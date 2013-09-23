@@ -23,6 +23,8 @@ void emhashmap_destroy(HashMap* map);
 
 bool emhashmap_initialize(HashMap* map, int capacity);
 
+void* emhashmap_get(HashMap* map, int key);
+
 bool emhashmap_contains(HashMap* map, int key);
 
 bool emhashmap_put(HashMap* map, int key, void* value);
