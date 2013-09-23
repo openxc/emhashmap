@@ -1,7 +1,7 @@
 #ifndef _EMHASHMAP_H_
 #define _EMHASHMAP_H_
 
-#include "emhashmap.h"
+#include "emlist.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -10,7 +10,7 @@ extern "C" {
 struct MapEntry {
    int key;
    void* value;
-}
+};
 
 struct HashMap {
    int capacity;
