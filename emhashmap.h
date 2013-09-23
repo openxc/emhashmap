@@ -21,15 +21,19 @@ HashMap* emhashmap_create(int capacity);
 
 void emhashmap_destroy(HashMap* map);
 
-void emhashmap_initialize(HashMap* map, int capacity);
+bool emhashmap_initialize(HashMap* map, int capacity);
 
 bool emhashmap_contains(HashMap* map, int key);
 
 bool emhashmap_put(HashMap* map, int key, void* value);
 
-bool emhashmap_remove(HashMap* map, int key);
-
-void emhashmap_clear(HashMap* map);
+/* Public: Remove a value with the given key from the map.
+ *
+ * Returns the value pointer if found in the map and removed - the map user is
+ * responsible for freeing any memory associated with that pointer.
+ * Returns NULL if the key was not in the map.
+ */
+void* emhashmap_remove(HashMap* map, int key);
 
 int emhashmap_size(HashMap* map);
 
