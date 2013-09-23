@@ -14,15 +14,14 @@ struct MapEntry {
 
 struct HashMap {
    int capacity;
-   int load_factor;
    LinkedList* buckets;
 };
 
-HashMap* emhashmap_create();
+HashMap* emhashmap_create(int capacity);
 
 void emhashmap_destroy(HashMap* map);
 
-void emhashmap_initialize(HashMap* map);
+void emhashmap_initialize(HashMap* map, int capacity);
 
 bool emhashmap_contains(HashMap* map, int key);
 

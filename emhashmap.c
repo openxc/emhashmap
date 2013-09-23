@@ -5,7 +5,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-HashMap* emhashmap_create() {
+HashMap* emhashmap_create(int capacity) {
+    HashMap* map = (HashMap*) malloc(sizeof(HashMap));
 }
 
 void emhashmap_destroy(HashMap* map) {

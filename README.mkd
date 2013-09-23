@@ -8,6 +8,10 @@ pointers.
 
 * emlist
 
+To get the dependencies:
+
+    $ git submodule update --init
+
 ## Projects using Emqueue
 
 ## Examples
