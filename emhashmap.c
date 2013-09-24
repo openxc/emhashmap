@@ -9,7 +9,11 @@
  * is restricted to int right now.
  */
 LinkedList* find_bucket(HashMap* map, int key) {
-    return &map->buckets[key % map->capacity];
+    LinkedList* bucket = NULL;
+    if(map != NULL && map->buckets != NULL) {
+        bucket = &map->buckets[key % map->capacity];
+    }
+    return bucket;
 }
 
 HashMap* emhashmap_create(int capacity) {
