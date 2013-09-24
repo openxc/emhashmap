@@ -1,7 +1,7 @@
 #ifndef _EMHASHMAP_H_
 #define _EMHASHMAP_H_
 
-#include "emlist.h"
+#include "emlist/emlist.h"
 
 #ifdef __cplusplus
 extern "C" {
