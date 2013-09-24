@@ -31,7 +31,6 @@ void emhashmap_destroy(HashMap* map) {
 bool emhashmap_initialize(HashMap* map, int capacity) {
     map->capacity = capacity;
     map->buckets = (LinkedList*) malloc(sizeof(LinkedList) * map->capacity);
-    bool result = true;
     for(int i = 0; i < map->capacity; i++) {
         emlist_initialize(&map->buckets[i]);
     }
@@ -82,7 +81,7 @@ bool emhashmap_put(HashMap* map, int key, void* value) {
             result &= emlist_insert(bucket, new_entry);
         }
     }
-    return true;
+    return result;
 }
 
 void* emhashmap_remove(HashMap* map, int key) {
