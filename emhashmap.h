@@ -11,11 +11,13 @@ struct MapEntry {
    int key;
    void* value;
 };
+typedef struct MapEntry MapEntry;
 
 struct HashMap {
    int capacity;
    LinkedList* buckets;
 };
+typedef struct HashMap HashMap;
 
 HashMap* emhashmap_create(int capacity);
 
