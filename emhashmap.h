@@ -7,6 +7,13 @@
 extern "C" {
 #endif
 
+/* Public: An entry in the map.
+ *
+ * key - the entry key, currently supports only integers.
+ * value - a pointer to the value. this must be allocated with malloc or
+ *      be in global scope, and the map entry does not take ownership of its
+ *      memory.
+ */
 struct MapEntry {
    int key;
    void* value;
