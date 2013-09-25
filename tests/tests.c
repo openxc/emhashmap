@@ -27,7 +27,8 @@ END_TEST
 
 START_TEST (test_collision)
 {
-    for(int i = 0; i < 1000; i++) {
+    int i = 0;
+    for(i = 0; i < 1000; i++) {
         ck_assert(emhashmap_put(map, i, (void*)i));
         ck_assert_int_eq(emhashmap_size(map), i + 1);
     }

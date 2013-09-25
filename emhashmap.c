@@ -32,7 +32,8 @@ void emhashmap_destroy(HashMap* map) {
 void emhashmap_deinitialize(HashMap* map) {
     if(map->buckets != NULL) {
         if(map->capacity > 0) {
-            for(int i = 0; i < map->capacity; i++) {
+            int i;
+            for(i = 0; i < map->capacity; i++) {
                 while(!emlist_is_empty(&map->buckets[i])) {
                     MapEntry* entry = emlist_pop(&map->buckets[i]);
                     if(entry != NULL) {
