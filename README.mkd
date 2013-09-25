@@ -12,7 +12,16 @@ To get the dependencies:
 
     $ git submodule update --init
 
-## Projects using Emqueue
+## Compiling
+
+    $ make
+
+## Test Suite
+
+This library has a test suite built with the `check` C library. Run the tests
+like so:
+
+    $ make test
 
 ## Examples
 
