@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -I. -Iemlist -c -w -Wall -Werror -g -ggdb
+CFLAGS = -I. -Iemlist -c -w -Wall -Werror -g -ggdb --std=c99
 LDFLAGS = -lm
 LDLIBS = -lcheck
 
