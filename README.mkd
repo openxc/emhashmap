@@ -18,6 +18,10 @@ To get the dependencies:
 
 ## Test Suite
 
+**Dependencies**
+
+* check
+
 This library has a test suite built with the `check` C library. Run the tests
 like so:
 

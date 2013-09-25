@@ -3,6 +3,7 @@ compiler:
   - gcc
 script: make test
 before_install:
+    - sudo apt-get install check
     - git submodule update --init --recursive
 notifications:
   hipchat:
