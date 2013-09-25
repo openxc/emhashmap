@@ -120,3 +120,7 @@ int emhashmap_size(HashMap* map) {
 bool emhashmap_is_empty(HashMap* map) {
     return emhashmap_size(map) == 0;
 }
+
+float emhashmap_load_factor(HashMap* map) {
+    return emhashmap_size(map) / map->capacity;
+}

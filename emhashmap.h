@@ -50,6 +50,16 @@ int emhashmap_size(HashMap* map);
 
 bool emhashmap_is_empty(HashMap* map);
 
+/* Public: Calculate the current load factor of the map.
+ *
+ * The load factor is the number of entries / number of buckets.
+ *
+ * map - the map to query.
+ *
+ * Returns the current load factor.
+ */
+float emhashmap_load_factor(HashMap* map);
+
 #ifdef __cplusplus
 }
 #endif
