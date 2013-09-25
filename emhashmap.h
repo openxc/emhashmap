@@ -33,6 +33,13 @@ struct HashMap {
 };
 typedef struct HashMap HashMap;
 
+struct MapIterator {
+   HashMap* map;
+   int current_bucket;
+   LinkedListIterator list_iterator;
+};
+typedef struct MapIterator MapIterator;
+
 /* Public: Allocate a new HashMap with the given capacity and return a pointer
  * to it.
  * You're in charge of the map's memory now, so make sure to call
@@ -136,6 +143,10 @@ bool emhashmap_is_empty(HashMap* map);
  * Returns the current load factor.
  */
 float emhashmap_load_factor(HashMap* map);
+
+MapIterator emhashmap_iterator(HashMap* map);
+
+MapEntry* emhashmap_iterator_next(MapIterator* iterator);
 
 #ifdef __cplusplus
 }

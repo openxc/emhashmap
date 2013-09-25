@@ -141,3 +141,25 @@ bool emhashmap_is_empty(HashMap* map) {
 float emhashmap_load_factor(HashMap* map) {
     return emhashmap_size(map) / map->capacity;
 }
+
+MapIterator emhashmap_iterator(HashMap* map) {
+    MapIterator iterator;
+    iterator.current_bucket = -1;
+    iterator.map = map;
+    return iterator;
+}
+
+MapEntry* emhashmap_iterator_next(MapIterator* iterator) {
+    LinkedListElement* next = NULL;
+    if(iterator != NULL) {
+        if(iterator->current_bucket > -1) {
+            next = emlist_iterator_next(&iterator->list_iterator);
+        }
+
+        while(next == NULL && iterator->current_bucket < iterator->map->capacity - 1) {
+            iterator->list_iterator = emlist_iterator(&iterator->map->buckets[++iterator->current_bucket]);
+            next = emlist_iterator_next(&iterator->list_iterator);
+        }
+    }
+    return next == NULL ? NULL : next->value;
+}

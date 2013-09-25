@@ -43,6 +43,21 @@ START_TEST (test_put_multiple)
 }
 END_TEST
 
+START_TEST (test_get)
+{
+    emhashmap_put(map, key, value);
+    void* entered_value = emhashmap_get(map, key);
+    ck_assert(entered_value != NULL);
+    ck_assert(entered_value == value);
+}
+END_TEST
+
+START_TEST (test_get_missing)
+{
+    ck_assert(emhashmap_get(map, key) == NULL);
+}
+END_TEST
+
 START_TEST (test_put)
 {
     ck_assert(emhashmap_put(map, key, value));
@@ -117,11 +132,52 @@ START_TEST (test_create)
 }
 END_TEST
 
+START_TEST (test_iterate_empty)
+{
+    MapIterator iterator = emhashmap_iterator(map);
+    ck_assert(emhashmap_iterator_next(&iterator) == NULL);
+}
+END_TEST
+
+START_TEST (test_iterate_one)
+{
+    emhashmap_put(map, key, value);
+    MapIterator iterator = emhashmap_iterator(map);
+    MapEntry* entry = emhashmap_iterator_next(&iterator);
+    ck_assert(entry != NULL);
+    ck_assert(entry->key == key);
+    ck_assert(entry->value == value);
+}
+END_TEST
+
+START_TEST (test_iterate_many)
+{
+    emhashmap_put(map, key, value);
+    emhashmap_put(map, 2, value);
+    MapIterator iterator = emhashmap_iterator(map);
+
+    MapEntry* entry = emhashmap_iterator_next(&iterator);
+    ck_assert(entry != NULL);
+    ck_assert(entry->key == key);
+    ck_assert(entry->value == value);
+
+    entry = emhashmap_iterator_next(&iterator);
+    ck_assert(entry != NULL);
+    ck_assert(entry->key == 2);
+    ck_assert(entry->value == value);
+
+    entry = emhashmap_iterator_next(&iterator);
+    ck_assert(entry == NULL);
+}
+END_TEST
+
 Suite* suite(void) {
     Suite* s = suite_create("queue");
     TCase *tc_core = tcase_create("core");
     tcase_add_checked_fixture (tc_core, setup, teardown);
     tcase_add_test(tc_core, test_init);
+    tcase_add_test(tc_core, test_get);
+    tcase_add_test(tc_core, test_get_missing);
     tcase_add_test(tc_core, test_put);
     tcase_add_test(tc_core, test_put_multiple);
     tcase_add_test(tc_core, test_collision);
@@ -133,6 +189,9 @@ Suite* suite(void) {
     tcase_add_test(tc_core, test_is_empty);
     tcase_add_test(tc_core, test_size);
     tcase_add_test(tc_core, test_create);
+    tcase_add_test(tc_core, test_iterate_empty);
+    tcase_add_test(tc_core, test_iterate_one);
+    tcase_add_test(tc_core, test_iterate_many);
     suite_add_tcase(s, tc_core);
 
     return s;
