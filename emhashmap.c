@@ -23,8 +23,25 @@ HashMap* emhashmap_create(int capacity) {
 }
 
 void emhashmap_destroy(HashMap* map) {
-    if(map->buckets != NULL && map->capacity > 0) {
-        free(map->buckets);
+    if(map != NULL) {
+        emhashmap_deinitialize(map);
+        free(map);
+    }
+}
+
+void emhashmap_deinitialize(HashMap* map) {
+    if(map->buckets != NULL) {
+        if(map->capacity > 0) {
+            for(int i = 0; i < map->capacity; i++) {
+                while(!emlist_is_empty(&map->buckets[i])) {
+                    MapEntry* entry = emlist_pop(&map->buckets[i]);
+                    if(entry != NULL) {
+                        free(entry);
+                    }
+                }
+            }
+            free(map->buckets);
+        }
     }
 }
 

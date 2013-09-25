@@ -17,11 +17,11 @@ void teardown() {
     emhashmap_destroy(map);
 }
 
-
 START_TEST (test_init)
 {
-    HashMap map;
-    emhashmap_initialize(&map, capacity);
+    HashMap stack_map;
+    emhashmap_initialize(&stack_map, capacity);
+    emhashmap_deinitialize(&stack_map);
 }
 END_TEST
 

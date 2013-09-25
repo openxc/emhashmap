@@ -44,7 +44,7 @@ typedef struct HashMap HashMap;
  */
 HashMap* emhashmap_create(int capacity);
 
-/* Public: Free the memory associated with a previously created map.
+/* Public: Free the memory associated with a map previously created on the heap.
  *
  * This will *not* free the memory associated with any values stored in the map
  * - only the map and its map entry objects.
@@ -64,6 +64,16 @@ void emhashmap_destroy(HashMap* map);
  * be allocated for the buckets.
  */
 bool emhashmap_initialize(HashMap* map, int capacity);
+
+/* Public: De-initialize a map, freeing memory for the buckets.
+ *
+ * This will *not* free the memory associated with any values stored in the map
+ * - only the map and its map entry objects.
+ *
+ * map - a pointer to the map to deinitialize. It must already be allocated on
+ *      the stack or heap.
+ */
+void emhashmap_deinitialize(HashMap* map);
 
 /* Public: Retrive the value for a given key from the map.
  *
