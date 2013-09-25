@@ -25,11 +25,39 @@ START_TEST (test_init)
 }
 END_TEST
 
+START_TEST (test_collision)
+{
+    for(int i = 0; i < 1000; i++) {
+        ck_assert(emhashmap_put(map, i, (void*)i));
+        ck_assert_int_eq(emhashmap_size(map), i + 1);
+    }
+    ck_assert(emhashmap_load_factor(map) > 1);
+}
+END_TEST
+
+START_TEST (test_put_multiple)
+{
+    ck_assert(emhashmap_put(map, key, value));
+    ck_assert(emhashmap_put(map, 2, (void*)2));
+    ck_assert_int_eq(emhashmap_size(map), 2);
+}
+END_TEST
+
 START_TEST (test_put)
 {
-    // TODO if we pass in something not allocated with malloc and then return
-    // from this frame, it'll fall off the stack and then we're in trouble. bah.
     ck_assert(emhashmap_put(map, key, value));
+    ck_assert_int_eq(emhashmap_size(map), 1);
+}
+END_TEST
+
+START_TEST (test_overwrite)
+{
+    ck_assert(emhashmap_put(map, key, value));
+    ck_assert_int_eq(emhashmap_size(map), 1);
+    void* another_value = (void*)2;
+    ck_assert(emhashmap_put(map, key, another_value));
+    ck_assert(emhashmap_get(map, key) == another_value);
+    ck_assert_int_eq(emhashmap_size(map), 1);
 }
 END_TEST
 
@@ -94,8 +122,10 @@ Suite* suite(void) {
     TCase *tc_core = tcase_create("core");
     tcase_add_checked_fixture (tc_core, setup, teardown);
     tcase_add_test(tc_core, test_init);
-    // TODO test put multiple, test collisions
     tcase_add_test(tc_core, test_put);
+    tcase_add_test(tc_core, test_put_multiple);
+    tcase_add_test(tc_core, test_collision);
+    tcase_add_test(tc_core, test_overwrite);
     tcase_add_test(tc_core, test_contains);
     tcase_add_test(tc_core, test_does_not_contain);
     tcase_add_test(tc_core, test_remove);
