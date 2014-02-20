@@ -70,7 +70,16 @@ void* emhashmap_get(HashMap* map, int key) {
 }
 
 bool emhashmap_contains(HashMap* map, int key) {
-    return emhashmap_get(map, key) != NULL;
+    LinkedListIterator iterator = emlist_iterator(find_bucket(map, key));
+    LinkedListElement* element = NULL;
+
+    while((element = emlist_iterator_next(&iterator)) != NULL) {
+       MapEntry* entry  = (MapEntry*) element->value;
+       if(entry->key == key) {
+           return true;
+       }
+    }
+    return false;
 }
 
 bool emhashmap_put(HashMap* map, int key, void* value) {

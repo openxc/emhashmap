@@ -84,6 +84,13 @@ START_TEST (test_contains)
 }
 END_TEST
 
+START_TEST (test_contains_null_value)
+{
+    emhashmap_put(map, key, NULL);
+    ck_assert(emhashmap_contains(map, key));
+}
+END_TEST
+
 START_TEST (test_does_not_contain)
 {
     emhashmap_put(map, key, value);
