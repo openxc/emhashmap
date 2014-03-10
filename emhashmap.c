@@ -16,16 +16,15 @@ LinkedList* find_bucket(HashMap* map, int key) {
     return bucket;
 }
 
-HashMap* emhashmap_create(int capacity) {
-    HashMap* map = (HashMap*) malloc(sizeof(HashMap));
-    emhashmap_initialize(map, capacity);
+HashMap emhashmap_create(int capacity) {
+    HashMap map;
+    emhashmap_initialize(&map, capacity);
     return map;
 }
 
 void emhashmap_destroy(HashMap* map) {
     if(map != NULL) {
         emhashmap_deinitialize(map);
-        free(map);
     }
 }
 

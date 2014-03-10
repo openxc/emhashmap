@@ -42,14 +42,19 @@ typedef struct MapIterator MapIterator;
 
 /* Public: Allocate a new HashMap with the given capacity and return a pointer
  * to it.
+ *
  * You're in charge of the map's memory now, so make sure to call
  * emhashmap_destroy(HashMap*).
  *
  * capacity - the fixed capacity for the new map.
  *
- * Returns a pointer to a new HashMap, or NULL if one could not be allocated.
+ * TODO this is wrong, this 'capacity' is actually the bucket count which isn't
+ * going to mean much to the user. Fixed capacity is going to mean backed by
+ * memory on the stack instead of the heap.
+ *
+ * Returns a new HashMap;
  */
-HashMap* emhashmap_create(int capacity);
+HashMap emhashmap_create(int capacity);
 
 /* Public: Free the memory associated with a map previously created on the heap.
  *
