@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 /* Private: Short and sweet hash function - "key mod capacity". The key type
  * is restricted to int right now.
