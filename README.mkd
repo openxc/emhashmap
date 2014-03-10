@@ -3,15 +3,8 @@ Generic C Hash Map for Embedded Systems
 
 This library is an implementation of a hash map in C that maps integers to void
 pointers. The map is initialized with a fixed size and load factor, and memory
-is allocated on the heap all at once.
-
-## Dependencies
-
-* emlist
-
-To get the dependencies:
-
-    $ git submodule update --init
+is allocated on the heap all at once. There are no dependencies besides the BSD
+queue.h, which is included in most systems by default.
 
 ## Compiling
 

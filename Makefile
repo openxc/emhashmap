@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -I. -Iemlist -c -w -Wall -Werror -g -ggdb
+CFLAGS = -I. -c -w -Wall -Werror -g -ggdb
 LDFLAGS = -lm
 LDLIBS = -lcheck
 
@@ -21,7 +21,7 @@ test: $(TEST_DIR)/tests.bin
 	@export SHELLOPTS
 	@sh runtests.sh $(TEST_DIR)
 
-$(TEST_DIR)/tests.bin: $(TEST_DIR)/tests.o emhashmap.o emlist/emlist.o
+$(TEST_DIR)/tests.bin: $(TEST_DIR)/tests.o emhashmap.o
 	@mkdir -p $(dir $@)
 	$(CC) $(LDFLAGS) $(CC_SYMBOLS) $(C_FLAGS) $(INCLUDE_PATHS) -o $@ $^ $(LDLIBS)
 
