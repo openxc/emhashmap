@@ -8,128 +8,106 @@
 /* Private: Short and sweet hash function - the key mod capacity. The key type
  * is restricted to int right now.
  */
-LinkedList* find_bucket(HashMap* map, int key) {
-    LinkedList* bucket = NULL;
+static MapBucketList* find_bucket(HashMap* map, int key) {
+    MapBucketList* bucket = NULL;
     if(map != NULL && map->buckets != NULL) {
-        bucket = &map->buckets[key % map->capacity];
+        bucket = &map->buckets[key % map->bucket_count];
     }
     return bucket;
 }
 
-HashMap emhashmap_create(int capacity) {
-    HashMap map;
-    emhashmap_initialize(&map, capacity);
-    return map;
-}
-
-void emhashmap_destroy(HashMap* map) {
-    if(map != NULL) {
-        emhashmap_deinitialize(map);
-    }
-}
-
 void emhashmap_deinitialize(HashMap* map) {
+    if(map->entries != NULL) {
+        free(map->entries);
+        map->entries = NULL;
+    }
+
     if(map->buckets != NULL) {
-        if(map->capacity > 0) {
-            int i;
-            for(i = 0; i < map->capacity; i++) {
-                while(!emlist_is_empty(&map->buckets[i])) {
-                    MapEntry* entry = emlist_pop(&map->buckets[i]);
-                    if(entry != NULL) {
-                        free(entry);
-                    }
-                }
-            }
-            free(map->buckets);
-        }
+        free(map->buckets);
+        map->buckets = NULL;
     }
 }
 
-bool emhashmap_initialize(HashMap* map, int capacity) {
+bool emhashmap_initialize(HashMap* map, int capacity, float load_factor) {
+    map->bucket_count = ((int)(capacity / load_factor) + 1);
     map->capacity = capacity;
-    map->buckets = (LinkedList*) malloc(sizeof(LinkedList) * map->capacity);
+    map->entries = (MapEntry*) malloc(sizeof(MapEntry) * map->capacity);
+    memset(map->entries, 0, sizeof(MapEntry) * map->capacity);
+    map->buckets = (MapBucketList*) malloc(sizeof(MapBucketList) *
+            map->bucket_count);
+    memset(map->buckets, 0, sizeof(MapBucketList) * map->bucket_count);
+
     int i;
+    for(i = 0; i < map->bucket_count; i++) {
+        LIST_INIT(&map->buckets[i]);
+    }
+
+    LIST_INIT(&map->free_list);
     for(i = 0; i < map->capacity; i++) {
-        emlist_initialize(&map->buckets[i]);
+        LIST_INSERT_HEAD(&map->free_list, &map->entries[i], entries);
     }
     return map->buckets != NULL;
 }
 
-void* emhashmap_get(HashMap* map, int key) {
-    LinkedListIterator iterator = emlist_iterator(find_bucket(map, key));
-    LinkedListElement* element = NULL;
+MapEntry* emhashmap_get(HashMap* map, int key) {
+    MapBucketList* bucket = find_bucket(map, key);
 
-    while((element = emlist_iterator_next(&iterator)) != NULL) {
-       MapEntry* entry  = (MapEntry*) element->value;
-       if(entry->key == key) {
-           return entry->value;
-       }
+    MapEntry* entry;
+    LIST_FOREACH(entry, bucket, entries) {
+        if(entry->key == key) {
+            return entry;
+        }
     }
     return NULL;
 }
 
 bool emhashmap_contains(HashMap* map, int key) {
-    LinkedListIterator iterator = emlist_iterator(find_bucket(map, key));
-    LinkedListElement* element = NULL;
-
-    while((element = emlist_iterator_next(&iterator)) != NULL) {
-       MapEntry* entry  = (MapEntry*) element->value;
-       if(entry->key == key) {
-           return true;
-       }
-    }
-    return false;
+    return emhashmap_get(map, key) != NULL;
 }
 
 bool emhashmap_put(HashMap* map, int key, void* value) {
-    LinkedList* bucket = find_bucket(map, key);
-    LinkedListIterator iterator = emlist_iterator(bucket);
-    LinkedListElement* element = NULL;
+    MapBucketList* bucket = find_bucket(map, key);
 
-    MapEntry* matching_entry = NULL;
-    while((element = emlist_iterator_next(&iterator)) != NULL) {
-       MapEntry* entry  = (MapEntry*) element->value;
-       if(entry->key == key) {
-           matching_entry = entry;
-           break;
-       }
+    MapEntry* entry, *matching_entry = NULL;
+    LIST_FOREACH(entry, bucket, entries) {
+        if(entry->key == key) {
+            matching_entry = entry;
+        }
     }
 
     bool result = true;
     if(matching_entry != NULL) {
         matching_entry->value = value;
     } else {
-        MapEntry* new_entry = (MapEntry*) malloc(sizeof(MapEntry));
+        MapEntry* new_entry = LIST_FIRST(&map->free_list);
         if(new_entry == NULL) {
             result = false;
         } else {
             new_entry->key = key;
             new_entry->value = value;
-            result &= emlist_insert(bucket, new_entry);
+            // TODO this is wiping the key sometimes? or not actually removing
+            // it from the free list
+            LIST_REMOVE(new_entry, entries);
+            LIST_INSERT_HEAD(bucket, new_entry, entries);
         }
     }
     return result;
 }
 
 void* emhashmap_remove(HashMap* map, int key) {
-    LinkedList* bucket = find_bucket(map, key);
-    LinkedListIterator iterator = emlist_iterator(bucket);
-    LinkedListElement* element = NULL;
+    MapBucketList* bucket = find_bucket(map, key);
 
-    MapEntry* matching_entry = NULL;
-    while((element = emlist_iterator_next(&iterator)) != NULL) {
-       MapEntry* entry  = (MapEntry*) element->value;
-       if(entry->key == key) {
-           matching_entry = entry;
-           break;
-       }
+    MapEntry* entry, *matching_entry = NULL;
+    LIST_FOREACH(entry, bucket, entries) {
+        if(entry->key == key) {
+            matching_entry = entry;
+        }
     }
 
     void* value = NULL;
     if(matching_entry != NULL) {
-        emlist_remove(bucket, matching_entry);
         value = matching_entry->value;
-        free(matching_entry);
+        LIST_REMOVE(matching_entry, entries);
     }
     return value;
 }
@@ -137,8 +115,11 @@ void* emhashmap_remove(HashMap* map, int key) {
 int emhashmap_size(HashMap* map) {
     int size = 0;
     int i;
-    for(i = 0; i < map->capacity; i++) {
-        size += emlist_size(&map->buckets[i]);
+    for(i = 0; i < map->bucket_count; i++) {
+        MapEntry* entry = NULL;
+        LIST_FOREACH(entry, &map->buckets[i], entries) {
+            ++size;
+        }
     }
     return size;
 }
@@ -159,16 +140,13 @@ MapIterator emhashmap_iterator(HashMap* map) {
 }
 
 MapEntry* emhashmap_iterator_next(MapIterator* iterator) {
-    LinkedListElement* next = NULL;
+    MapEntry* next = NULL;
     if(iterator != NULL) {
-        if(iterator->current_bucket > -1) {
-            next = emlist_iterator_next(&iterator->list_iterator);
+        while(next == NULL) {
         }
-
-        while(next == NULL && iterator->current_bucket < iterator->map->capacity - 1) {
-            iterator->list_iterator = emlist_iterator(&iterator->map->buckets[++iterator->current_bucket]);
-            next = emlist_iterator_next(&iterator->list_iterator);
-        }
+        do {
+            next = LIST_FIRST(&iterator->map->buckets[iterator->current_bucket]);
+        } while(iterator->current_bucket > -1 && next == NULL && iterator->current_bucket < iterator->map->capacity - 1);
     }
     return next == NULL ? NULL : next->value;
 }
