@@ -2,7 +2,8 @@ Generic C Hash Map for Embedded Systems
 ====================================
 
 This library is an implementation of a hash map in C that maps integers to void
-pointers.
+pointers. The map is initialized with a fixed size and load factor, and memory
+is allocated on the heap all at once.
 
 ## Dependencies
 
@@ -31,28 +32,30 @@ like so:
 
     #include "emhashmap.h"
 
-    HashMap* map = emhashmap_create();
+    #define MAX_CAPACITY 64
+
+    HashMap map = emhashmap_create(64);
 
     int key = 42;
     char* value = "foo";
-    emhashmap_put(map, key, (void*)value);
+    emhashmap_put(&map, key, (void*)value);
 
     bool contains = emhashmap_contains(list, key);
     // contains == true
 
-    int size = emhashmap_size(map);
+    int size = emhashmap_size(&map);
     // size == 1
 
-    emhashmap_remove(map, key);
+    emhashmap_remove(&map, key);
 
-    emhashmap_is_empty(map);
+    emhashmap_is_empty(&map);
     // == true
 
-    emhashmap_destroy(map);
+    emhashmap_destroy(&map);
 
 ## License
 
-This library is licensed under the BSD license and is Copyright 2013,
+This library is licensed under the BSD license and is Copyright 2014,
 Ford Motor Company
 
 ## Contributors

@@ -5,34 +5,34 @@
 #include <stdlib.h>
 
 HashMap map;
-int capacity = 5;
+int capacity = 128;
+float load_factor = 10;
 int key = 1;
 void* value = (void*) 1;
 
 void setup() {
-    map = emhashmap_create(capacity);
+    emhashmap_initialize(&map, capacity, load_factor);
 }
 
 void teardown() {
-    emhashmap_destroy(&map);
+    emhashmap_deinitialize(&map);
 }
 
 START_TEST (test_init)
 {
-    HashMap stack_map;
-    emhashmap_initialize(&stack_map, capacity);
-    emhashmap_deinitialize(&stack_map);
+    emhashmap_initialize(&map, capacity, .5);
+    emhashmap_deinitialize(&map);
 }
 END_TEST
 
-START_TEST (test_collision)
+START_TEST (test_fill_up)
 {
-    int i = 0;
-    for(i = 0; i < 1000; i++) {
+    int i;
+    for(i = 0; i < capacity; i++) {
         ck_assert(emhashmap_put(&map, i, (void*)i));
         ck_assert_int_eq(emhashmap_size(&map), i + 1);
     }
-    ck_assert(emhashmap_load_factor(&map) > 1);
+    ck_assert(!emhashmap_put(&map, i, (void*)i));
 }
 END_TEST
 
@@ -47,9 +47,9 @@ END_TEST
 START_TEST (test_get)
 {
     emhashmap_put(&map, key, value);
-    void* entered_value = emhashmap_get(&map, key);
+    MapEntry* entered_value = emhashmap_get(&map, key);
     ck_assert(entered_value != NULL);
-    ck_assert(entered_value == value);
+    ck_assert(entered_value->value == value);
 }
 END_TEST
 
@@ -72,8 +72,8 @@ START_TEST (test_overwrite)
     ck_assert_int_eq(emhashmap_size(&map), 1);
     void* another_value = (void*)2;
     ck_assert(emhashmap_put(&map, key, another_value));
-    ck_assert(emhashmap_get(&map, key) == another_value);
     ck_assert_int_eq(emhashmap_size(&map), 1);
+    ck_assert(emhashmap_get(&map, key)->value == another_value);
 }
 END_TEST
 
@@ -188,7 +188,7 @@ Suite* suite(void) {
     tcase_add_test(tc_core, test_get_missing);
     tcase_add_test(tc_core, test_put);
     tcase_add_test(tc_core, test_put_multiple);
-    tcase_add_test(tc_core, test_collision);
+    tcase_add_test(tc_core, test_fill_up);
     tcase_add_test(tc_core, test_overwrite);
     tcase_add_test(tc_core, test_contains);
     tcase_add_test(tc_core, test_does_not_contain);

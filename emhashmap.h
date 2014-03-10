@@ -1,7 +1,8 @@
 #ifndef _EMHASHMAP_H_
 #define _EMHASHMAP_H_
 
-#include "emlist/emlist.h"
+#include <sys/queue.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,84 +18,72 @@ extern "C" {
 struct MapEntry {
    int key;
    void* value;
+   LIST_ENTRY(MapEntry) entries;
 };
 typedef struct MapEntry MapEntry;
 
-/* Public: A fixed bucket capacity HashMap container, supporting unlimited
- * objects (but with an increasing load factor).
+LIST_HEAD(MapBucketList, MapEntry);
+typedef struct MapBucketList MapBucketList;
+
+/* Public: A struct encapsulating a map's state. All of the fields are private
+ * - use the  emhashmap_ functions to interact with the map.
  *
- * capacity - the number of buckets in the hash map.
- * buckets - a dynamically allocated array of LinkedLists, representing the
- * buckets.
+ * bucket_count - The fixed count of buckets for elements in the map.
+ * capacity - The total, fixed capacity of the map.
+ * buckets - An array of MapBucketList lists, each a bucket in the map.
+ * entries - An array of all entry slots, to be used in each bucket.
+ * free_list - An array of all entries when not actively in a bucket.
  */
 struct HashMap {
+   int bucket_count;
    int capacity;
-   LinkedList* buckets;
+   MapBucketList* buckets;
+   MapEntry* entries;
+   MapBucketList free_list;
 };
 typedef struct HashMap HashMap;
 
 struct MapIterator {
    HashMap* map;
    int current_bucket;
-   LinkedListIterator list_iterator;
+   MapEntry* current_entry;
 };
 typedef struct MapIterator MapIterator;
 
-/* Public: Allocate a new HashMap with the given capacity and return a pointer
- * to it.
+/* Public: Initialize a map with the given capacity and load factor (determines
+ * the number of buckets).
  *
- * You're in charge of the map's memory now, so make sure to call
- * emhashmap_destroy(HashMap*).
- *
- * capacity - the fixed capacity for the new map.
- *
- * TODO this is wrong, this 'capacity' is actually the bucket count which isn't
- * going to mean much to the user. Fixed capacity is going to mean backed by
- * memory on the stack instead of the heap.
- *
- * Returns a new HashMap;
- */
-HashMap emhashmap_create(int capacity);
-
-/* Public: Free the memory associated with a map previously created on the heap.
- *
- * This will *not* free the memory associated with any values stored in the map
- * - only the map and its map entry objects.
- */
-void emhashmap_destroy(HashMap* map);
-
-/* Public: Initialize a map with the given capacity.
- *
- * This allocates memory for the buckets to serve the capacity, so make sure to
- * call emhashmap_destroy(HashMap*) after done with this map.
+ * This allocates memory for the buckets and entries, so make sure to call
+ * emhashmap_destroy(HashMap*) after done with this map.
  *
  * map - a pointer to the map to initialize. It must already be allocated on the
  *      stack or heap.
  * capacity - the initial capacity for the map.
+ * load_factor - The desired load factor when the map is at capacity.
  *
- * Returns true if the map was initialize successfully, false if space could not
- * be allocated for the buckets.
+ * Returns true if the map was initialized, successfully, false if space could
+ * not be allocated for the buckets or entries.
  */
-bool emhashmap_initialize(HashMap* map, int capacity);
+bool emhashmap_initialize(HashMap* map, int capacity, float load_factor);
 
-/* Public: De-initialize a map, freeing memory for the buckets.
+/* Public: De-initialize a map, freeing memory for the buckets and entries.
  *
  * This will *not* free the memory associated with any values stored in the map
- * - only the map and its map entry objects.
+ * - only the buckets and map entry objects.
  *
  * map - a pointer to the map to deinitialize. It must already be allocated on
  *      the stack or heap.
  */
 void emhashmap_deinitialize(HashMap* map);
 
-/* Public: Retrive the value for a given key from the map.
+/* Public: Retrive the entry for a given key from the map.
  *
  * map - the map to retrive the value.
  * key - the key for this value.
  *
- * Returns the value if found, otherwise NULL.
+ * Returns the MapEntry if found, otherwise NULL.
  */
-void* emhashmap_get(HashMap* map, int key);
+MapEntry* emhashmap_get(HashMap* map, int key);
 
 /* Public: Check if the given key is in the map.
  *
@@ -138,16 +127,6 @@ int emhashmap_size(HashMap* map);
  * Returns true if there are no entries in the map.
  */
 bool emhashmap_is_empty(HashMap* map);
-
-/* Public: Calculate the current load factor of the map.
- *
- * The load factor is the number of entries / number of buckets.
- *
- * map - the map to query.
- *
- * Returns the current load factor.
- */
-float emhashmap_load_factor(HashMap* map);
 
 MapIterator emhashmap_iterator(HashMap* map);
 
