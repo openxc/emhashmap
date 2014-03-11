@@ -98,6 +98,9 @@ bool emhashmap_contains(HashMap* map, int key);
  *
  * If the key already exists in the map, its value will be overridden (so make
  * sure you've freed the memory associated with the existing value).
+ *
+ * Returns true if there was space in the map and the key-value pair was added
+ * successfully. Returns false if the map is full.
  */
 bool emhashmap_put(HashMap* map, int key, void* value);
 
