@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -I. -c -w -Wall -Werror -g -ggdb
 LDFLAGS = -lm
-LDLIBS = -lcheck -lm -lrt -lpthread -lsubunit
+LDLIBS = -lcheck -lm -lrt -lpthread
 
 TEST_DIR = tests
 
